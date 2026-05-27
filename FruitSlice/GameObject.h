@@ -1,0 +1,151 @@
+#pragma once
+#pragma once
+
+#include "Utillity.h"
+#include <algorithm>
+// [CHECK]. namespace 포함해서 전방 선언해야 함
+namespace learning
+{
+    struct ColliderCircle;
+    struct ColliderBox;
+}
+
+enum class ObjectType
+{
+    PLAYER,
+    ENEMY,
+    BULLET,
+    ITEM,
+    BACKGROUND,
+};
+
+constexpr int OBJECT_NAME_LEN_MAX = 15;
+
+class GameObjectBase
+{
+    using Vector2f = learning::Vector2f;
+public:
+    GameObjectBase() = delete;
+    GameObjectBase(const GameObjectBase&) = delete;
+
+    GameObjectBase(ObjectType type) : m_type(type) {}
+
+    virtual ~GameObjectBase() = default;
+
+    virtual void Update(float deltaTime) = 0;
+    virtual void Render(HDC hdc) = 0;
+
+    void SetPosition(float x, float y) { m_pos = { x, y }; }
+    void SetDirection(Vector2f dir) { m_dir = dir; }
+    void SetSpeed(float speed) { m_speed = speed; }
+    void SetName(const char* name);
+
+    ObjectType Type() const { return m_type; }
+
+    const char* GetName() const { return m_name; }
+
+    Vector2f GetPosition() const { return m_pos; }
+    Vector2f GetDirection() const { return m_dir; }
+
+    float GetSpeed() const { return m_speed; }
+
+    void SetWidth(int w) { m_width = w; };
+    void SetHeight(int h) { m_height = h; };
+
+protected:
+
+    void Move(float deltaTime)
+    {
+        m_pos.x += m_dir.x * m_speed * deltaTime;
+        m_pos.y += m_dir.y * m_speed * deltaTime;
+    }
+
+protected:
+    ObjectType m_type;
+
+    int m_width = 0;
+    int m_height = 0;
+
+    Vector2f m_pos = { 0.0f, 0.0f };
+    Vector2f m_dir = { 0.0f, 0.0f }; // 방향 (단위 벡터)
+
+    float m_speed = 0.0f; // 속력
+
+    char m_name[OBJECT_NAME_LEN_MAX] = "";
+};
+
+namespace renderHelp
+{
+    class BitmapInfo;
+}
+
+class GameObject : public GameObjectBase
+{
+    using ColliderCircle = learning::ColliderCircle;
+    using ColliderBox = learning::ColliderBox;
+
+    using BitmapInfo = renderHelp::BitmapInfo;
+
+public:
+    GameObject(const GameObject&) = delete;
+    GameObject(ObjectType type) : GameObjectBase(type) {}
+    ~GameObject() override;
+
+    void Update(float deltaTime) override;
+    void Render(HDC hdc) override;
+
+    void SetColliderCircle(float radius);
+    void SetColliderBox(float halfWidth, float halfHeight);
+    // 충돌처리 -> 충돌 시 true 반환
+    bool IsCollidingWith(const GameObject* pOther) const;
+    void SetColliding(bool isColliding) { m_isColliding = isColliding; }
+    bool IsColliding() const { return m_isColliding; }
+
+    // 펜 생성 함수
+    static void InitializeResources();
+    // 펜 해제 함수
+    static void ReleaseResources();
+
+    // 비트맵 관련 함수
+    void SetBitmapInfo(BitmapInfo* bitmapInfo);
+
+protected:
+    void DrawCollider(HDC hdc);
+
+    void Move(float deltaTime);
+
+    // Collider
+    ColliderCircle* m_pColliderCircle = nullptr;
+    ColliderBox* m_pColliderBox = nullptr;
+
+    void DrawBitmap(HDC hdc);
+    void UpdateFrame(float deltaTime);
+
+    // Bitmap 정보
+    BitmapInfo* m_pBitmapInfo = nullptr;
+    struct FrameFPos
+    {
+        int x;
+        int y;
+    };
+    // 프레임 정보: 왜 14개냐고 물으시면 셌다고 밖에...:)
+    FrameFPos m_frameXY[14] = { { 0, 0 }, };
+    int m_frameWidth = 0;
+    int m_frameHeight = 0;
+    int m_frameIndex = 0;
+    int m_frameCount = 14; // 프레임 수
+
+    float m_frameTime = 0.0f;
+    float m_frameDuration = 100.0f; // 임의 설정
+
+private:
+    // 충돌 여부를 판단하는 변수
+    bool m_isColliding = false;
+
+    // 파란펜
+    static HPEN s_hPenColliding;
+    // 빨간 펜
+    static HPEN s_hPenNormal;
+    // 초록 펜
+    static HPEN s_hPenEnemy;
+};
