@@ -54,9 +54,6 @@ bool MyFirstWndGame::Initialize()
 
 #pragma endregion
 
-    // [CHECK]. 첫 번째 게임 오브젝트는 플레이어 캐릭터로 고정!
-    CreatePlayer();
-
     return true;
 
 }
@@ -123,96 +120,14 @@ void MyFirstWndGame::FixedUpdate()
 {
     if (m_EnemySpawnPos.x != 0 && m_EnemySpawnPos.y != 0)
     {
-        CreateEnemy();
     }
 }
 
-// 플레이어와 적의 충돌상태 점검
-void MyFirstWndGame::HandlePlayerEnemyCollision()
-{
-    for (int i = 0; i < MAX_GAME_OBJECT_COUNT; ++i)
-    {
-        GameObject* pObj = static_cast<GameObject*>(m_GameObjectPtrTable[i]);
-        if (pObj)
-        {
-            pObj->SetColliding(false);
-        }
-    }
 
-    GameObject* pPlayer = GetPlayer();
-    if (pPlayer == nullptr)
-        return;
-
-    for (int i = 1; i < MAX_GAME_OBJECT_COUNT; ++i)
-    {
-        GameObject* pOther = static_cast<GameObject*>(m_GameObjectPtrTable[i]);
-        if (pOther == nullptr)
-            continue;
-
-        if (pOther->Type() != ObjectType::ENEMY)
-            continue;
-
-        if (pPlayer->IsCollidingWith(pOther))
-        {
-            pPlayer->SetColliding(true);
-            pOther->SetColliding(true);
-        }
-    }
-
-}
-
-void MyFirstWndGame::EnemyCollision()
-{
-    for (int i = 0; i < MAX_GAME_OBJECT_COUNT; ++i)
-    {
-        GameObject* pObj = static_cast<GameObject*>(m_GameObjectPtrTable[i]);
-        if (pObj == nullptr)
-            continue;
-
-        if (pObj->Type() != ObjectType::ENEMY)
-            continue;
-
-        for (int j = i + 1; j < MAX_GAME_OBJECT_COUNT; ++j)
-        {
-            GameObject* pOther = static_cast<GameObject*>(m_GameObjectPtrTable[j]);
-            if (pOther == nullptr)
-                continue;
-
-            if (pOther->Type() != ObjectType::ENEMY)
-                continue;
-
-            Vector2f posA = pObj->GetPosition();
-            Vector2f posB = pOther->GetPosition();
-
-            Vector2f distance = posB - posA;
-            float distanceAB = distance.Length();
-            float minDis = 50.0f;
-            if (distanceAB < minDis && distanceAB > 0.0f)
-            {
-                float overlap = minDis - distanceAB; // 겹친 깊이
-                distance.Normalize();
-
-                // 겹친 만큼 절반씩 양쪽으로 강제 이동시켜 밀어냄
-                Vector2f pushOut = distance * (overlap * 0.5f);
-
-                Vector2f newPosA = posA - pushOut;
-                Vector2f newPosB = posB + pushOut;
-
-                pObj->SetPosition(newPosA.x, newPosA.y);
-                pOther->SetPosition(newPosB.x, newPosB.y);
-            }
-
-        }
-    }
-}
 
 
 void MyFirstWndGame::LogicUpdate()
 {
-
-    UpdatePlayerInfo();
-    UpdateEnemyInfo();
-
     for (int i = 0; i < MAX_GAME_OBJECT_COUNT; ++i)
     {
         if (m_GameObjectPtrTable[i])
@@ -221,225 +136,8 @@ void MyFirstWndGame::LogicUpdate()
         }
     }
 
-    HandlePlayerEnemyCollision();
-    EnemyCollision();
 
 }
-
-void MyFirstWndGame::CreatePlayer()
-{
-    // 디버깅 코드 -> 배포시에는 동작하지 않음
-    assert(m_GameObjectPtrTable[0] == nullptr && "Player object already exists!");
-
-    GameObject* pNewObject = new GameObject(ObjectType::PLAYER);
-
-    pNewObject->SetName("Player");
-    //pNewObject->SetPosition(0.0f, 0.0f); // 일단, 임의로 설정 
-
-    //창의 중앙에 배치 -> NzWndBase를 상속받았기 때문에 GetWidth, GetHeight 사용 가능
-    float centerX = static_cast<float>(GetWidth()) / 2.0f;
-    float centerY = static_cast<float>(GetHeight()) / 2.0f;
-
-    pNewObject->SetPosition(centerX, centerY);
-    // 기존 초기화되어있는 플레이어의 기본위치가 0,0 이므로 중앙값으로 변경
-    m_PlayerTargetPos.x = static_cast<int>(centerX);
-    m_PlayerTargetPos.y = static_cast<int>(centerY);
-    pNewObject->SetSpeed(1.0f); // 일단, 임의로 설정   
-
-    pNewObject->SetColliderCircle(50.0f); // 일단, 임의로 설정. 오브젝트 설정할 거 다 하고 나서 하자.
-    pNewObject->SetBitmapInfo(m_pPlayerBitmapInfo);
-
-    pNewObject->SetWidth(100);
-    pNewObject->SetHeight(100);
-
-    m_GameObjectPtrTable[0] = pNewObject;
-}
-
-void MyFirstWndGame::CreateEnemy()
-{
-    GameObject* pNewObject = new GameObject(ObjectType::ENEMY);
-
-    pNewObject->SetName("Enemy");
-
-    float x = m_EnemySpawnPos.x;
-    float y = m_EnemySpawnPos.y;
-
-    m_EnemySpawnPos = { 0, 0 };
-
-    pNewObject->SetPosition(x, y);
-    pNewObject->SetSpeed(0.1f); // 일단, 임의로 설정   
-
-    pNewObject->SetColliderCircle(50.0f); // 일단, 임의로 설정. 오브젝트 설정할 거 다 하고 나서 하자.
-    pNewObject->SetBitmapInfo(m_pEnemyBitmapInfo);
-
-    pNewObject->SetWidth(100);
-    pNewObject->SetHeight(100);
-
-    int i = 0;
-    bool isOverlapping = false;
-
-    // 충돌 검사 
-    for (int j = 0; j < MAX_GAME_OBJECT_COUNT; ++j)
-    {
-        GameObject* pOther = static_cast<GameObject*>(m_GameObjectPtrTable[j]);
-        if (pOther == nullptr)
-            continue;
-
-        if (pNewObject->IsCollidingWith(pOther))
-        {
-            isOverlapping = true;
-            break;
-        }
-    }
-
-    if (isOverlapping)
-    {
-        delete pNewObject;
-        return;
-    }
-
-    while (++i < MAX_GAME_OBJECT_COUNT) //0번째는 언제나 플레이어!
-    {
-        if (nullptr == m_GameObjectPtrTable[i])
-        {
-            m_GameObjectPtrTable[i] = pNewObject;
-            break;
-        }
-    }
-
-    if (i == MAX_GAME_OBJECT_COUNT)
-    {
-        // 게임 오브젝트 테이블이 가득 찼습니다.
-        delete pNewObject;
-        pNewObject = nullptr;
-    }
-}
-
-void MyFirstWndGame::UpdatePlayerInfo()
-{
-    static GameObject* pPlayer = GetPlayer();
-
-    assert(pPlayer != nullptr);
-
-    Vector2f mousePos(m_PlayerTargetPos.x, m_PlayerTargetPos.y);
-    Vector2f playerPos = pPlayer->GetPosition();
-
-    Vector2f playerDir = mousePos - playerPos;
-    float distance = playerDir.Length(); // 거리 계산
-
-    if (distance > 50.f) //임의로 설정한 거리
-    {
-        playerDir.Normalize(); // 정규화
-        pPlayer->SetDirection(playerDir); // 플레이어 방향 설정
-    }
-    else
-    {
-        pPlayer->SetDirection(Vector2f(0, 0)); // 플레이어 정지
-    }
-}
-
-// 플레이어 이동 시 적이 추적
-void MyFirstWndGame::UpdateEnemyInfo()
-{
-    if (m_mouseCheck < 1)
-    {
-        return;
-    }
-
-    // 플레이어 객체를 가져와 현재 위치를 목표 지점으로 설정
-    GameObject* pPlayer = GetPlayer();
-    if (pPlayer == nullptr) return;
-
-    Vector2f playerPos = pPlayer->GetPosition();
-
-    for (int i = 0; i < MAX_GAME_OBJECT_COUNT; ++i)
-    {
-        GameObject* pOther = static_cast<GameObject*>(m_GameObjectPtrTable[i]);
-
-        if (pOther == nullptr) continue;
-        if (pOther->Type() != ObjectType::ENEMY) continue;
-
-        Vector2f enemyPos = pOther->GetPosition();
-        // 최종 이동 방향을 누적하기 위한 벡터 초기화
-        Vector2f finalDir = { 0.0f, 0.0f };
-
-        // 목표(플레이어)를 향하는 방향 벡터와 거리 계산
-        Vector2f enemyDir = playerPos - enemyPos;
-        float distanceToPlayer = enemyDir.Length();
-
-        // 플레이어 방향으로 이동
-        if (distanceToPlayer > 100.0f)
-        {
-            enemyDir.Normalize();
-            // 정규화된 방향 벡터로 이동
-            // 방향 벡터만 설정하고, 실제 이동 속도는 GameObject의 Update에서 적용된다고 가정
-            finalDir = finalDir + enemyDir;
-        }
-        else
-        {
-            pOther->SetDirection(Vector2f(0, 0));
-        }
-        // 주변 적들과의 거리를 벌리기 위한 분리 방향 벡터 초기화
-        Vector2f separationDir = { 0.0f, 0.0f };
-        int enemyCount = 0;
-
-        for (int j = 1; j < MAX_GAME_OBJECT_COUNT; ++j)
-        {
-            // 나 자신과의 연산은 제외
-            if (i == j) continue;
-
-            // 다른 적과의 충돌계산
-            GameObject* pOtherEnemy = static_cast<GameObject*>(m_GameObjectPtrTable[j]);
-            if (pOtherEnemy == nullptr || pOtherEnemy->Type() != ObjectType::ENEMY) continue;
-
-            Vector2f otherPos = pOtherEnemy->GetPosition();
-
-            // 적끼리의 방향 벡터와 거리 계산
-            Vector2f dirEnemy = enemyPos - otherPos;
-            float distanceToEnemy = dirEnemy.Length();
-
-            // 적이 100거리 이내에 있을때 동작
-            if (distanceToEnemy > 0.0f && distanceToEnemy < 100.0f)
-            {
-                dirEnemy.Normalize();
-                separationDir = separationDir + dirEnemy;
-                enemyCount++;
-            }
-        }
-
-        // 적이 하나 이상일때 동작
-        if (enemyCount > 0)
-        {
-            // 회피 가중치를 부여해 플레이어 추적보다 적끼리 겹치지 않는것을 우선 연산
-            separationDir = separationDir * 1.5f;
-            finalDir = finalDir + separationDir;
-        }
-
-        if (finalDir.Length() > 0.0f)
-        {
-            finalDir.Normalize();
-            // 최종방향에 대한 위치 계산
-            Vector2f nextPos = enemyPos + finalDir;
-            Vector2f nextDirToPlayer = playerPos - nextPos;
-
-            // 밀려난 거리가 99 이내면 정지
-            if (nextDirToPlayer.Length() < 99.0f)
-            {
-                pOther->SetDirection(Vector2f(0.0f, 0.0f));
-            }
-            else
-            {
-                pOther->SetDirection(finalDir);
-            }
-        }
-        else
-        {
-            pOther->SetDirection(Vector2f(0.0f, 0.0f));
-        }
-    }
-
-}
-
 
 void MyFirstWndGame::Update()
 {
@@ -517,8 +215,6 @@ void MyFirstWndGame::OnLButtonDown(int x, int y)
     /*  std::cout << __FUNCTION__ << std::endl;
  std::cout << "x: " << x << ", y: " << y << std::endl;*/
 
-    m_PlayerTargetPos.x = x;
-    m_PlayerTargetPos.y = y;
     m_mouseCheck++;
 }
 
@@ -527,6 +223,4 @@ void MyFirstWndGame::OnRButtonDown(int x, int y)
     /*  std::cout << __FUNCTION__ << std::endl;
    std::cout << "x: " << x << ", y: " << y << std::endl;*/
 
-    m_EnemySpawnPos.x = x;
-    m_EnemySpawnPos.y = y;
 }

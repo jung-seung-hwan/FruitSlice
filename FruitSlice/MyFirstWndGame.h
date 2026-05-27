@@ -37,14 +37,6 @@ private:
 
     void FixedUpdate();
     void LogicUpdate();
-    void HandlePlayerEnemyCollision();
-
-    void CreatePlayer();
-    void CreateEnemy();
-
-    void UpdatePlayerInfo();
-    void UpdateEnemyInfo();
-    void EnemyCollision();
 
     GameObject* GetPlayer() const { return (GameObject*)m_GameObjectPtrTable[0]; }
     int m_mouseCheck = 0;
