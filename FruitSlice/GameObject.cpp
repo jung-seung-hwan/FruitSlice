@@ -76,13 +76,18 @@ void GameObject::SetBitmapInfo(BitmapInfo* bitmapInfo)
 {
     assert(m_pBitmapInfo == nullptr && "BitmapInfo must be null!");
     m_pBitmapInfo = bitmapInfo;
-    // 스프라이트 정보는 일단은 하드코딩해요. 
 
 }
 
 
 void GameObject::Update(float deltaTime)
 {
+    // 중력 가속도 상수
+    constexpr float GRAVITY = 980.0f;
+
+    // 중력을 적용하여 객체 이동
+    Move(deltaTime, GRAVITY);
+
     // 이동한 중심좌표에 따라서 Collider 업데이트
     if (m_pColliderCircle)
     {
@@ -202,4 +207,14 @@ bool GameObject::IsCollidingWith(const GameObject* pOther) const
     }
 
     return false;
+}
+
+void GameObject::OnSpawn()
+{
+    // 객체 활성화 시 부모 단위에서 공통으로 처리할 초기화 로직
+}
+
+void GameObject::OnDespawn()
+{
+    // 객체 비활성화 시 부모 단위에서 공통으로 처리할 정리 로직
 }

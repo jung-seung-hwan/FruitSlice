@@ -6,7 +6,7 @@ template <typename T>
 class ObjectPool
 {
 public:
-    ObjectPool(int capacity) : m_capacity(capacity)
+    ObjectPool(int capacity) : m_capacity(capacity), m_currentIndex(0)
     {
         // 초기화 시점에 지정된 용량만큼 메모리를 미리 할당
         m_pool.reserve(capacity);
@@ -64,4 +64,5 @@ public:
 private:
     std::vector<T*> m_pool;
     int m_capacity;
+    int m_currentIndex;
 };

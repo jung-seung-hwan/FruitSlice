@@ -32,3 +32,13 @@ void TitleScene::Render(HDC hDC)
     }
 
 }
+
+void TitleScene::Finalize()
+{
+    // 씬 메모리 해제 시 호출되는 로직
+}
+
+void TitleScene::Leave()
+{
+    // 다른 씬으로 전환될 때 호출되는 로직
+}

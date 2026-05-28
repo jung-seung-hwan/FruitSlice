@@ -1,5 +1,6 @@
 #pragma once
 
+#include "INC_Windows.h"
 #include "Utillity.h"
 #include <algorithm>
 
@@ -44,28 +45,42 @@ public:
     virtual void Render(HDC hdc) = 0;
 
     void SetPosition(float x, float y) { m_pos = { x, y }; }
-    void SetDirection(Vector2f dir) { m_dir = dir; }
-    void SetSpeed(float speed) { m_speed = speed; }
     void SetName(const char* name);
 
     const char* GetName() const { return m_name; }
 
     Vector2f GetPosition() const { return m_pos; }
-    Vector2f GetDirection() const { return m_dir; }
-
-    float GetSpeed() const { return m_speed; }
 
     void SetWidth(int w) { m_width = w; };
     void SetHeight(int h) { m_height = h; };
+
+    // 속도 제어 함수 추가
+    void SetVelocity(Vector2f velocity) { m_velocity = velocity; }
+    void AddVelocity(Vector2f velocity) {
+        m_velocity.x += velocity.x;
+        m_velocity.y += velocity.y;
+    }
+    Vector2f GetVelocity() const { return m_velocity; }
 
 protected:
     int m_width = 0;
     int m_height = 0;
 
     Vector2f m_pos = { 0.0f, 0.0f };
-    Vector2f m_dir = { 0.0f, 0.0f }; // 방향 (단위 벡터)
 
-    float m_speed = 0.0f; // 속력
+    Vector2f m_velocity = { 0.0f, 0.0f };
+
+    // 중력 가속도를 적용하는 물리 이동 함수
+    void Move(float deltaTime, float gravity = 0.0f)
+    {
+        // 가속도(중력)를 속도에 누적 (v = v0 + at)
+        // 화면 좌표계는 아래로 갈수록 Y값이 증가하므로 중력은 양수(+)로 적용
+        m_velocity.y += gravity * deltaTime;
+
+        // 속도를 위치에 적용 (p = p0 + vt)
+        m_pos.x += m_velocity.x * deltaTime;
+        m_pos.y += m_velocity.y * deltaTime;
+    }
 
     char m_name[OBJECT_NAME_LEN_MAX] = "";
 };
@@ -83,6 +98,7 @@ class GameObject : public GameObjectBase
     using BitmapInfo = renderHelp::BitmapInfo;
 
 public:
+    GameObject() = default;
     GameObject(const GameObject&) = delete;
     ~GameObject() override;
 
@@ -110,8 +126,6 @@ public:
 
 protected:
     void DrawCollider(HDC hdc);
-
-    void Move(float deltaTime);
 
     // Collider
     ColliderCircle* m_pColliderCircle = nullptr;

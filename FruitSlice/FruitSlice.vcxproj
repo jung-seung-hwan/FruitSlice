@@ -124,22 +124,36 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Collider.cpp" />
+    <ClCompile Include="EndingScene.cpp" />
+    <ClCompile Include="Fruit.cpp" />
+    <ClCompile Include="FruitSpawner.cpp" />
     <ClCompile Include="GameObject.cpp" />
     <ClCompile Include="GameTimer.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="MyFirstWndGame.cpp" />
     <ClCompile Include="NzWndBase.cpp" />
+    <ClCompile Include="PlayScene.cpp" />
     <ClCompile Include="RenderHelp.cpp" />
+    <ClCompile Include="SceneManager.cpp" />
+    <ClCompile Include="TitleScene.cpp" />
     <ClCompile Include="Utillity.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Collider.h" />
+    <ClInclude Include="EndingScene.h" />
+    <ClInclude Include="Fruit.h" />
+    <ClInclude Include="FruitSpawner.h" />
     <ClInclude Include="GameObject.h" />
     <ClInclude Include="GameTimer.h" />
     <ClInclude Include="INC_Windows.h" />
     <ClInclude Include="MyFirstWndGame.h" />
     <ClInclude Include="NzWndBase.h" />
+    <ClInclude Include="ObjectPool.h" />
+    <ClInclude Include="PlayScene.h" />
     <ClInclude Include="RenderHelp.h" />
+    <ClInclude Include="Scene.h" />
+    <ClInclude Include="SceneManager.h" />
+    <ClInclude Include="TitleScene.h" />
     <ClInclude Include="Utillity.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
