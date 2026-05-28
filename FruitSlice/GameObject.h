@@ -1,18 +1,37 @@
 #pragma once
-#pragma once
 
 #include "Utillity.h"
 #include <algorithm>
-// [CHECK]. namespace 포함해서 전방 선언해야 함
+
+// namespace 포함해서 전방 선언
 namespace learning
 {
     struct ColliderCircle;
     struct ColliderBox;
+    struct ColliderLine;
 }
 
+// 스스로 활성화 상태 관리 및 초기화하는 공통 규격
+class IPoolable
+{
+public:
+    virtual ~IPoolable() = default;
+
+    virtual void OnSpawn() = 0;
+    virtual void OnDespawn() = 0;
+
+    bool IsActive() const { return m_isActive; }
+    void SetActive(bool active) { m_isActive = active; }
+
+protected:
+    bool m_isActive = false; // 객체의 활성/비활성 상태 (기본값: 비활성)
+};
+
+// 최대 생성 오브젝트 15개
 constexpr int OBJECT_NAME_LEN_MAX = 15;
 
-class GameObjectBase
+// GameObjectBase가 IPoolable을 상속
+class GameObjectBase : public IPoolable
 {
     using Vector2f = learning::Vector2f;
 public:
@@ -66,6 +85,10 @@ class GameObject : public GameObjectBase
 public:
     GameObject(const GameObject&) = delete;
     ~GameObject() override;
+
+    // 생명주기 함수 오버라이드 선언
+    void OnSpawn() override;
+    void OnDespawn() override;
 
     void Update(float deltaTime) override;
     void Render(HDC hdc) override;
