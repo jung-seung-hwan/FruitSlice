@@ -10,25 +10,14 @@ namespace learning
     struct ColliderBox;
 }
 
-enum class ObjectType
-{
-    PLAYER,
-    ENEMY,
-    BULLET,
-    ITEM,
-    BACKGROUND,
-};
-
 constexpr int OBJECT_NAME_LEN_MAX = 15;
 
 class GameObjectBase
 {
     using Vector2f = learning::Vector2f;
 public:
-    GameObjectBase() = delete;
+    GameObjectBase() = default;
     GameObjectBase(const GameObjectBase&) = delete;
-
-    GameObjectBase(ObjectType type) : m_type(type) {}
 
     virtual ~GameObjectBase() = default;
 
@@ -39,8 +28,6 @@ public:
     void SetDirection(Vector2f dir) { m_dir = dir; }
     void SetSpeed(float speed) { m_speed = speed; }
     void SetName(const char* name);
-
-    ObjectType Type() const { return m_type; }
 
     const char* GetName() const { return m_name; }
 
@@ -53,16 +40,6 @@ public:
     void SetHeight(int h) { m_height = h; };
 
 protected:
-
-    void Move(float deltaTime)
-    {
-        m_pos.x += m_dir.x * m_speed * deltaTime;
-        m_pos.y += m_dir.y * m_speed * deltaTime;
-    }
-
-protected:
-    ObjectType m_type;
-
     int m_width = 0;
     int m_height = 0;
 
@@ -88,7 +65,6 @@ class GameObject : public GameObjectBase
 
 public:
     GameObject(const GameObject&) = delete;
-    GameObject(ObjectType type) : GameObjectBase(type) {}
     ~GameObject() override;
 
     void Update(float deltaTime) override;
@@ -128,15 +104,6 @@ protected:
         int x;
         int y;
     };
-    // 프레임 정보: 왜 14개냐고 물으시면 셌다고 밖에...:)
-    FrameFPos m_frameXY[14] = { { 0, 0 }, };
-    int m_frameWidth = 0;
-    int m_frameHeight = 0;
-    int m_frameIndex = 0;
-    int m_frameCount = 14; // 프레임 수
-
-    float m_frameTime = 0.0f;
-    float m_frameDuration = 100.0f; // 임의 설정
 
 private:
     // 충돌 여부를 판단하는 변수

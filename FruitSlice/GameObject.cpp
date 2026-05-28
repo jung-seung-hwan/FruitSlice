@@ -7,12 +7,10 @@
 // 펜 그리기 함수
 HPEN GameObject::s_hPenColliding = nullptr;
 HPEN GameObject::s_hPenNormal = nullptr;
-HPEN GameObject::s_hPenEnemy = nullptr;
 
 void GameObject::InitializeResources() {
     s_hPenColliding = CreatePen(PS_SOLID, 2, RGB(0, 0, 255));
     s_hPenNormal = CreatePen(PS_SOLID, 2, RGB(255, 0, 0));
-    s_hPenEnemy = CreatePen(PS_SOLID, 2, RGB(0, 255, 0));
 }
 
 // 과제: 해당 코드의 문제는 무엇일까요? 어떻게 개선하면 좋을까요?
@@ -28,14 +26,6 @@ void GameObject::DrawCollider(HDC hdc)
     // 주소로 펜과 브러시 선택
     HPEN hTargetPen = s_hPenNormal;
 
-    if (m_isColliding)
-    {
-        hTargetPen = s_hPenColliding;
-    }
-    else if (Type() == ObjectType::ENEMY)
-    {
-        hTargetPen = s_hPenEnemy;
-    }
     //HPEN hTargetPen = m_isColliding ? s_hPenColliding : s_hPenNormal;
     HPEN hOldPen = (HPEN)SelectObject(hdc, hTargetPen);
     HBRUSH hOldBrush = (HBRUSH)SelectObject(hdc, (HBRUSH)GetStockObject(NULL_BRUSH));
@@ -87,37 +77,12 @@ void GameObject::SetBitmapInfo(BitmapInfo* bitmapInfo)
     assert(m_pBitmapInfo == nullptr && "BitmapInfo must be null!");
     m_pBitmapInfo = bitmapInfo;
     // 스프라이트 정보는 일단은 하드코딩해요. 
-    // 일단, 프레임 크기와 시간이 같다고 가정합니다.
-    m_frameWidth = m_pBitmapInfo->GetWidth() / 5;
-    m_frameHeight = m_pBitmapInfo->GetHeight() / 3;
-    m_frameIndex = 0;
 
-    for (int i = 0; i < 5; ++i)
-    {
-        m_frameXY[i].x = i * m_frameWidth;
-        m_frameXY[i].y = 0;
-    }
-
-    for (int i = 0; i < 5; ++i)
-    {
-        m_frameXY[i + 5].x = i * m_frameWidth;
-        m_frameXY[i + 5].y = m_frameHeight;
-    }
-
-    for (int i = 0; i < 4; ++i)
-    {
-        m_frameXY[i + 10].x = i * m_frameWidth;
-        m_frameXY[i + 10].y = m_frameHeight * 2;
-    }
 }
 
 
 void GameObject::Update(float deltaTime)
 {
-    UpdateFrame(deltaTime);
-    // deltaTime을 곱해서 중심좌표를 이동
-    Move(deltaTime);
-
     // 이동한 중심좌표에 따라서 Collider 업데이트
     if (m_pColliderCircle)
     {
@@ -171,11 +136,6 @@ void GameObject::SetColliderBox(float width, float height)
     m_pColliderBox->halfSize.y = height / 2.0f;
 }
 
-void GameObject::Move(float deltaTime)
-{
-    GameObjectBase::Move(deltaTime);
-}
-
 void GameObject::DrawBitmap(HDC hdc)
 {
     if (m_pBitmapInfo == nullptr) return;
@@ -192,12 +152,7 @@ void GameObject::DrawBitmap(HDC hdc)
 
     const int x = m_pos.x - m_width / 2;
     const int y = m_pos.y - m_height / 2;
-
-    const int srcX = m_frameXY[m_frameIndex].x;
-    const int srcY = m_frameXY[m_frameIndex].y;
-
-    AlphaBlend(hdc, x, y, m_width, m_height,
-        hBitmapDC, srcX, srcY, m_frameWidth, m_frameHeight, blend);
+    AlphaBlend(hdc, x, y, m_width, m_height, hBitmapDC, 0, 0, m_pBitmapInfo->GetWidth(), m_pBitmapInfo->GetHeight(), blend);
 
     // 비트맵 핸들 복원
     SelectObject(hBitmapDC, hOldBitmap);
@@ -205,15 +160,6 @@ void GameObject::DrawBitmap(HDC hdc)
 
 }
 
-void GameObject::UpdateFrame(float deltaTime)
-{
-    m_frameTime += deltaTime;
-    if (m_frameTime >= m_frameDuration)
-    {
-        m_frameTime = 0.0f;
-        m_frameIndex = (m_frameIndex + 1) % (m_frameCount);
-    }
-}
 
 void GameObjectBase::SetName(const char* name)
 {
