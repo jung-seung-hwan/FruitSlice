@@ -111,6 +111,7 @@ public:
 
     void SetColliderCircle(float radius);
     void SetColliderBox(float halfWidth, float halfHeight);
+    const ColliderCircle* GetColliderCircle() const { return m_pColliderCircle; }
     // 충돌처리 -> 충돌 시 true 반환
     bool IsCollidingWith(const GameObject* pOther) const;
     void SetColliding(bool isColliding) { m_isColliding = isColliding; }
