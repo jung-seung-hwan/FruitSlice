@@ -1,4 +1,3 @@
-// 가능하면 타이머 함수 개별로 만들어 보기
 #include "MyFirstWndGame.h"
 #include "GameTimer.h"
 #include "Collider.h"
@@ -6,10 +5,9 @@
 #include <iostream>
 #include <assert.h>
 #include "RenderHelp.h"
+#include "SceneManager.h"
 
 using namespace learning;
-
-constexpr int MAX_GAME_OBJECT_COUNT = 1000;
 
 // 게임 시작 호출
 bool MyFirstWndGame::Initialize()
@@ -37,22 +35,8 @@ bool MyFirstWndGame::Initialize()
 
     m_hDefaultBitmap = (HBITMAP)SelectObject(m_hBackDC, m_hBackBitmap);
 
-    m_GameObjectPtrTable = new GameObjectBase * [MAX_GAME_OBJECT_COUNT];
-
-    GameObject::InitializeResources();
-
-    // memset or ZeroMemory로 for문으로 개별 배열에 넣는게 아닌 한번에 null로 초기화 가능
-    for (int i = 0; i < MAX_GAME_OBJECT_COUNT; ++i)
-    {
-        m_GameObjectPtrTable[i] = nullptr;
-    }
-
-#pragma region resource
-    // IDE에서 인지하는 현재 경로와 실제 실행 파일을 바로 실행했을 때의 경로 기준이 다름
-    m_pPlayerBitmapInfo = renderHelp::CreateBitmapInfo(L"./Resource/redbird.png");
-    m_pEnemyBitmapInfo = renderHelp::CreateBitmapInfo(L"./Resource/graybird.png");
-
-#pragma endregion
+    // SceneManager 초기화 및 첫 씬 진입 설정
+    SceneManager::GetInstance().Initialize();
 
     return true;
 
@@ -99,19 +83,7 @@ void MyFirstWndGame::Finalize()
     delete m_pGameTimer;
     m_pGameTimer = nullptr;
 
-    if (m_GameObjectPtrTable)
-    {
-        for (int i = 0; i < MAX_GAME_OBJECT_COUNT; ++i)
-        {
-            if (m_GameObjectPtrTable[i])
-            {
-                delete m_GameObjectPtrTable[i];
-                m_GameObjectPtrTable[i] = nullptr;
-            }
-        }
-        delete m_GameObjectPtrTable;
-    }
-
+    SceneManager::GetInstance().Finalize();
     GameObject::ReleaseResources();
     __super::Destroy();
 }
@@ -128,15 +100,8 @@ void MyFirstWndGame::FixedUpdate()
 
 void MyFirstWndGame::LogicUpdate()
 {
-    for (int i = 0; i < MAX_GAME_OBJECT_COUNT; ++i)
-    {
-        if (m_GameObjectPtrTable[i])
-        {
-            m_GameObjectPtrTable[i]->Update(m_fDeltaTime);
-        }
-    }
-
-
+    // 씬 매니저의 Update를 호출하여 현재 씬 내부의 객체들이 갱신되도록 위임
+    SceneManager::GetInstance().Update(m_fDeltaTime);
 }
 
 void MyFirstWndGame::Update()
@@ -162,14 +127,8 @@ void MyFirstWndGame::Render()
     //Clear the back buffer
     ::PatBlt(m_hBackDC, 0, 0, m_width, m_height, WHITENESS);
 
-    //메모리 DC에 그리기
-    for (int i = 0; i < MAX_GAME_OBJECT_COUNT; ++i)
-    {
-        if (m_GameObjectPtrTable[i])
-        {
-            m_GameObjectPtrTable[i]->Render(m_hBackDC);
-        }
-    }
+    // Scene에 그림을 그릴 공간 정보 전달
+    SceneManager::GetInstance().Render(m_hBackDC);
 
     //메모리 DC에 그려진 결과를 실제 DC(m_hFrontDC)로 복사
     BitBlt(m_hFrontDC, 0, 0, m_width, m_height, m_hBackDC, 0, 0, SRCCOPY);

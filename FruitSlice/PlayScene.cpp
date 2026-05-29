@@ -3,7 +3,8 @@
 
 void PlayScene::Initialize()
 {
-    // 리소스 로드 등 1회성 초기화
+    // 리소스 로드 (배경)
+    m_pBackgroundBitmapInfo = renderHelp::CreateBitmapInfo(L"./Resource/background.png");
 }
 
 void PlayScene::Enter()
@@ -30,6 +31,21 @@ void PlayScene::Update(float deltaTime)
 
 void PlayScene::Render(HDC hDC)
 {
+    if (m_pBackgroundBitmapInfo)
+    {
+        // 배경을 복사하기 위한 임시 메모리 공간 생성
+        HDC hMemDC = CreateCompatibleDC(hDC);
+        HBITMAP hOldBitmap = (HBITMAP)SelectObject(hMemDC, m_pBackgroundBitmapInfo->GetBitmapHandle());
+
+        // 메모리에 올려둔 배경 비트맵을 실제 렌더링될 버퍼로 복사
+        BitBlt(hDC, 0, 0, m_pBackgroundBitmapInfo->GetWidth(), m_pBackgroundBitmapInfo->GetHeight(), hMemDC, 0, 0, SRCCOPY);
+
+        // 사용이 끝난 임시 공간 정리
+        SelectObject(hMemDC, hOldBitmap);
+        DeleteDC(hMemDC);
+    }
+
+    //  배경 위에 과일, 파편, 이펙트 등 활성화된 객체 렌더링
     for (auto* pObj : m_GameObjects)
     {
         if (pObj && pObj->IsActive())
@@ -52,4 +68,9 @@ void PlayScene::Leave()
 void PlayScene::Finalize()
 {
     // 씬이 완전히 파괴될 때 메모리 해제
+    if (m_pBackgroundBitmapInfo)
+    {
+        delete m_pBackgroundBitmapInfo;
+        m_pBackgroundBitmapInfo = nullptr;
+    }
 }

@@ -10,6 +10,14 @@ namespace renderHelp
         HBITMAP GetBitmapHandle() const { return m_hBitmap; }
         int GetWidth() const { return m_width; }
         int GetHeight() const { return m_height; }
+        ~BitmapInfo()
+        {
+            if (m_hBitmap)
+            {
+                DeleteObject(m_hBitmap);
+                m_hBitmap = nullptr;
+            }
+        }
 
     private:
         friend struct WICInitializer;
@@ -23,15 +31,6 @@ namespace renderHelp
             GetObject(hBitmap, sizeof(BITMAP), &bitmap);
             m_width = bitmap.bmWidth;
             m_height = bitmap.bmHeight;
-        }
-
-        ~BitmapInfo()
-        {
-            if (m_hBitmap)
-            {
-                DeleteObject(m_hBitmap);
-                m_hBitmap = nullptr;
-            }
         }
 
     private:
