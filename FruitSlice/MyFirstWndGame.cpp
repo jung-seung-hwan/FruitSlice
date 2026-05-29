@@ -6,12 +6,15 @@
 #include <assert.h>
 #include "RenderHelp.h"
 #include "SceneManager.h"
+#include <time.h>
 
 using namespace learning;
 
 // 게임 시작 호출
 bool MyFirstWndGame::Initialize()
 {
+    srand(static_cast<unsigned int>(time(NULL)));
+
     m_pGameTimer = new GameTimer();
     m_pGameTimer->Reset();
 
@@ -111,14 +114,15 @@ void MyFirstWndGame::Update()
     // 가변 프레임 처리 -> 화면 갱신되는 횟수와 동일
     LogicUpdate();
 
-    m_fDeltaTime = m_pGameTimer->DeltaTimeMS();
+    m_fDeltaTime = m_pGameTimer->DeltaTime();
+    LogicUpdate();
     m_fFrameCount += m_fDeltaTime;
 
     //고정 프레임 처리 -> 매 프레임의 시간을 누적하고 누적한 시간에 따라 fixedupdate를 반복해서 실행 -> 시간이 200.0f만 지났으면 1회 600.0f 지났으면 3회 반복
-    while (m_fFrameCount >= 200.0f)
+    while (m_fFrameCount >= 0.2f)
     {
         FixedUpdate();
-        m_fFrameCount -= 200.0f;
+        m_fFrameCount -= 0.2f;
     }
 }
 

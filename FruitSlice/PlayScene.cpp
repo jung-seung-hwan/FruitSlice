@@ -1,20 +1,43 @@
 #include "PlayScene.h"
 #include "GameObject.h"
 #include "Collider.h"
+#include "Fruit.h"
+#include "ObjectPool.h"
+#include "FruitSpawner.h"
 
 void PlayScene::Initialize()
 {
     // 리소스 로드 (배경)
     m_pBackgroundBitmapInfo = renderHelp::CreateBitmapInfo(L"./Resource/background.png");
+    // 과일 이미지 로드
+    m_pAppleBitmapInfo = renderHelp::CreateBitmapInfo(L"./Resource/Fruits.png");
+    // 오브젝트 풀 및 스포너 생성
+    m_pFruitPool = new ObjectPool<Fruit>(15);
+    m_pFruitSpawner = new FruitSpawner(m_pFruitPool);
+    // 풀에 생성된 모든 과일을 씬의 렌더링 리스트에 미리 등록
+    const std::vector<Fruit*>& poolItems = m_pFruitPool->GetAllObjects();
+    for (Fruit* pFruit : poolItems)
+    {
+        pFruit->SetBitmapInfo(m_pAppleBitmapInfo);
+        m_GameObjects.push_back(pFruit);
+    }
 }
 
 void PlayScene::Enter()
 {
     // 씬 진입 시 초기 설정
+    Fruit* pTestFruit = new Fruit();
+    pTestFruit->OnSpawn();
+    m_GameObjects.push_back(pTestFruit);
 }
 
 void PlayScene::Update(float deltaTime)
 {
+    if (m_pFruitSpawner)
+    {
+        m_pFruitSpawner->Update(deltaTime);
+    }
+
     for (auto* pObj : m_GameObjects)
     {
         if (pObj && pObj->IsActive()) pObj->Update(deltaTime);
@@ -129,7 +152,7 @@ void PlayScene::Leave()
     // 씬 전환 시 객체들 비활성화 또는 초기화
     for (auto* pObj : m_GameObjects)
     {
-        delete pObj;
+        pObj->SetActive(false);
     }
     m_GameObjects.clear();
 }
@@ -142,4 +165,13 @@ void PlayScene::Finalize()
         delete m_pBackgroundBitmapInfo;
         m_pBackgroundBitmapInfo = nullptr;
     }
+
+    if (m_pAppleBitmapInfo)
+    {
+        delete m_pAppleBitmapInfo;
+        m_pAppleBitmapInfo = nullptr;
+    }
+
+    delete m_pFruitSpawner;
+    delete m_pFruitPool;
 }

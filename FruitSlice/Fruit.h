@@ -21,4 +21,6 @@ private:
     // 화면 경계 이탈 검사를 위한 해상도 수치
     int m_screenWidth = 1024;
     int m_screenHeight = 720;
+
+    int m_fruitType = 0; // 0:사과, 1:오렌지, 2:복숭아, 3:배, 4:키위레몬, 5:파인애플
 };

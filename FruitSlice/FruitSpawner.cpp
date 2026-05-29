@@ -34,8 +34,8 @@ void FruitSpawner::SpawnFruit()
     newFruit->SetPosition(randomX, startY);
 
     // 초기 속도 벡터 설정
-    float randomVx = static_cast<float>((rand() % 100) - 50) * 0.05f; // 좌우 난수
-    float startVy = -15.0f; // 윈도우 좌표계는 Y가 아래로 갈수록 증가하므로 음수 부여
+    float randomVx = static_cast<float>((rand() % 100) - 50) * 3.0f; // 좌우 난수
+    float startVy = -750.0f; // 윈도우 좌표계는 Y가 아래로 갈수록 증가하므로 음수 부여
 
      newFruit->SetVelocity(learning::Vector2f{randomVx, startVy});
 }
