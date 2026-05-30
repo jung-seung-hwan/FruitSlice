@@ -84,19 +84,25 @@ void PlayScene::Update(float deltaTime)
             {
                 if (pObj && pObj->IsActive())
                 {
+                    Fruit* pFruit = dynamic_cast<Fruit*>(pObj);
                     // 과일 객체가 자신의 ColliderCircle 정보를 반환
                     GameObject* pGameObj = static_cast<GameObject*>(pObj);
 
                     // 원형 충돌체 정보를 가져옴
                     const learning::ColliderCircle* pCircle = pGameObj->GetColliderCircle();
 
-                    // 만들어둔 Intersect 함수로 충돌 검사
-                    if (learning::Intersect(slashLine, *pCircle))
+                    if (pFruit != nullptr)
                     {
-                        // 충돌 성공 처리
-                        pObj->SetActive(false);
+                        // 원형 충돌체 정보를 가져옴
+                        const learning::ColliderCircle* pCircle = pFruit->GetColliderCircle();
 
-                        // TODO: 이곳에 과일이 반으로 갈라지는 이펙트나 점수 증가 로직을 추가
+                        // 3. 충돌체가 존재하고, 아직 잘리지 않은 과일이며, 선분과 충돌했을 경우
+                        if (pCircle != nullptr && !pFruit->IsSliced() && learning::Intersect(slashLine, *pCircle))
+                        {
+                            // 과일 파편화 실행
+                            pFruit->Slice();
+
+                        }
                     }
                 }
             }
