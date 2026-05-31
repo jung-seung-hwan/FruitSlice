@@ -5,7 +5,6 @@ enum class SceneType
 {
     TITLE,
     PLAY,
-    ENDING,
     MAX
 };
 

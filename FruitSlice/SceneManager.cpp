@@ -1,14 +1,12 @@
 #include "SceneManager.h"
 #include "TitleScene.h"
 #include "PlayScene.h"
-#include "EndingScene.h"
 
 void SceneManager::Initialize()
 {
     // 각 씬 인스턴스화 및 초기화
     m_arrScenes[static_cast<int>(SceneType::TITLE)] = new TitleScene();
     m_arrScenes[static_cast<int>(SceneType::PLAY)] = new PlayScene();
-    m_arrScenes[static_cast<int>(SceneType::ENDING)] = new EndingScene();
 
     for (int i = 0; i < static_cast<int>(SceneType::MAX); ++i)
     {

@@ -124,7 +124,6 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Collider.cpp" />
-    <ClCompile Include="EndingScene.cpp" />
     <ClCompile Include="Fruit.cpp" />
     <ClCompile Include="FruitSpawner.cpp" />
     <ClCompile Include="GameObject.cpp" />
@@ -140,7 +139,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Collider.h" />
-    <ClInclude Include="EndingScene.h" />
     <ClInclude Include="Fruit.h" />
     <ClInclude Include="FruitSpawner.h" />
     <ClInclude Include="GameObject.h" />
