@@ -4,23 +4,34 @@
 #include "Fruit.h"
 #include "ObjectPool.h"
 #include "FruitSpawner.h"
+#include <string>
+
+static int s_highScore = 0;
 
 void PlayScene::Initialize()
 {
     // 리소스 로드 (배경)
     m_pBackgroundBitmapInfo = renderHelp::CreateBitmapInfo(L"./Resource/background.png");
+
     // 과일 이미지 로드
     m_pAppleBitmapInfo = renderHelp::CreateBitmapInfo(L"./Resource/Fruits.png");
+
     // 오브젝트 풀 및 스포너 생성
     m_pFruitPool = new ObjectPool<Fruit>(15);
     m_pFruitSpawner = new FruitSpawner(m_pFruitPool);
+
     // 풀에 생성된 모든 과일을 씬의 렌더링 리스트에 미리 등록
     const std::vector<Fruit*>& poolItems = m_pFruitPool->GetAllObjects();
+
     for (Fruit* pFruit : poolItems)
     {
         pFruit->SetBitmapInfo(m_pAppleBitmapInfo);
         m_GameObjects.push_back(pFruit);
     }
+    m_score = 0;
+    m_missedCount = 0;
+    m_bGameOver = false;
+
 }
 
 void PlayScene::Enter()
@@ -33,14 +44,59 @@ void PlayScene::Enter()
 
 void PlayScene::Update(float deltaTime)
 {
+    if (m_bGameOver)
+    {
+        // R 키를 누르면 재시작
+        if ((GetAsyncKeyState('R') & 0x8000) != 0)
+        {
+            // 상태 변수 초기화 (최고 점수 제외)
+            m_score = 0;
+            m_missedCount = 0;
+            m_bGameOver = false;
+
+            // 화면에 남아있는 모든 과일 객체 강제 회수
+            for (auto* pObj : m_GameObjects)
+            {
+                if (pObj && pObj->IsActive())
+                {
+                    pObj->SetActive(false);
+                    pObj->OnDespawn();
+                }
+            }
+        }
+        return; // 게임 오버 상태일 때는 아래 물리 연산을 진행하지 않음
+    }
+
     if (m_pFruitSpawner)
     {
         m_pFruitSpawner->Update(deltaTime);
     }
 
+    // 객체 업데이트 및 화면 이탈 관리
     for (auto* pObj : m_GameObjects)
     {
-        if (pObj && pObj->IsActive()) pObj->Update(deltaTime);
+        if (pObj && pObj->IsActive())
+        {
+            pObj->Update(deltaTime);
+
+            Fruit* pFruit = dynamic_cast<Fruit*>(pObj);
+            if (pFruit && pFruit->IsOutOfBounds())
+            {
+                // 안 잘린 상태로 화면 아래로 떨어졌을 경우
+                if (!pFruit->IsSliced() && pFruit->GetPosition().y > 720.0f)
+                {
+                    m_missedCount++;
+                    if (m_missedCount >= 5)
+                    {
+                        m_bGameOver = true;
+                    }
+                }
+
+                // 화면을 벗어난 객체 회수
+                pFruit->SetActive(false);
+                pFruit->OnDespawn();
+            }
+        }
     }
 
     POINT mousePt;
@@ -96,11 +152,18 @@ void PlayScene::Update(float deltaTime)
                         // 원형 충돌체 정보를 가져옴
                         const learning::ColliderCircle* pCircle = pFruit->GetColliderCircle();
 
-                        // 3. 충돌체가 존재하고, 아직 잘리지 않은 과일이며, 선분과 충돌했을 경우
+                        // 충돌체가 존재하고, 아직 잘리지 않은 과일이며, 선분과 충돌했을 경우 
                         if (pCircle != nullptr && !pFruit->IsSliced() && learning::Intersect(slashLine, *pCircle))
                         {
-                            // 과일 파편화 실행
+                            // 과일 파편화
                             pFruit->Slice();
+
+                            // 점수 10점 증가 및 최고 점수 갱신
+                            m_score += 10;
+                            if (m_score > s_highScore)
+                            {
+                                s_highScore = m_score;
+                            }
 
                         }
                     }
@@ -151,11 +214,47 @@ void PlayScene::Render(HDC hDC)
             pObj->Render(hDC);
         }
     }
+
+    SetBkMode(hDC, TRANSPARENT);
+
+    // 점수 및 최고 점수 출력
+    SetTextColor(hDC, RGB(0, 0, 255));
+    std::wstring scoreText = L"Score: " + std::to_wstring(m_score);
+    std::wstring highText = L"High Score: " + std::to_wstring(s_highScore);
+    TextOutW(hDC, 20, 20, scoreText.c_str(), scoreText.length());
+    TextOutW(hDC, 20, 50, highText.c_str(), highText.length());
+
+    // 놓친 횟수 출력
+    SetTextColor(hDC, RGB(255, 0, 0));
+    std::wstring missText = L"Missed: " + std::to_wstring(m_missedCount) + L" / 5";
+    TextOutW(hDC, 20, 80, missText.c_str(), missText.length());
+
+    // 게임 오버 상태일 경우 중앙에 텍스트 출력
+    if (m_bGameOver)
+    {
+        std::wstring overText = L"GAME OVER";
+        TextOutW(hDC, 512 - 40, 300, overText.c_str(), overText.length());
+    }
+
+    if (m_bGameOver)
+    {
+        std::wstring restartText = L"Press 'R' to Restart";
+
+        // 텍스트 출력 기준점을 좌상단에서 중앙 상단으로 변경
+        SetTextAlign(hDC, TA_CENTER | TA_TOP);
+
+        // 화면 가로 해상도(1024)의 절반인 512를 X축 기준으로 출력
+        TextOutW(hDC, 512, 350, restartText.c_str(), restartText.length());
+
+        // 다른 UI가 깨지지 않도록 정렬 기준 초기화
+        SetTextAlign(hDC, TA_LEFT | TA_TOP);
+    }
+
 }
 
 void PlayScene::Leave()
 {
-    // 씬 전환 시 객체들 비활성화 또는 초기화
+    // 씬 전환 시 객체들 비활성화
     for (auto* pObj : m_GameObjects)
     {
         pObj->SetActive(false);

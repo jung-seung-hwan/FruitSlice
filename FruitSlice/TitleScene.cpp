@@ -2,6 +2,7 @@
 #include "SceneManager.h"
 #include "GameObject.h"
 #include "RenderHelp.h"
+#include <string>
 
 void TitleScene::Initialize()
 {
@@ -75,6 +76,32 @@ void TitleScene::Render(HDC hDC)
         SelectObject(hMemDC, hOldBitmap);
         DeleteDC(hMemDC);
     }
+
+    // 1. 크고 굵은 폰트 생성 (높이 72, 굵기 FW_BOLD, 폰트명 Arial)
+    HFONT hFont = CreateFontW(
+        72, 0, 0, 0, FW_BOLD, FALSE, FALSE, FALSE,
+        DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS,
+        CLEARTYPE_QUALITY, VARIABLE_PITCH | FF_SWISS, L"Arial"
+    );
+
+    // 2. 생성한 폰트를 DC에 적용하고 기존 폰트 백업
+    HFONT hOldFont = (HFONT)SelectObject(hDC, hFont);
+
+    // 3. 텍스트 그리기 설정
+    SetBkMode(hDC, TRANSPARENT);
+    SetTextColor(hDC, RGB(255, 100, 0));   // 오렌지색 계열 
+    SetTextAlign(hDC, TA_CENTER | TA_TOP); // 중앙 정렬
+
+    // 4. 타이틀 텍스트 출력 (X: 512, Y: 150 지점)
+    std::wstring titleText = L"Fruits Slice";
+    TextOutW(hDC, 512, 150, titleText.c_str(), titleText.length());
+
+    // 5. 사용이 끝난 폰트 리소스 반환 및 삭제 (중요)
+    SelectObject(hDC, hOldFont);
+    DeleteObject(hFont);
+
+    // 정렬 기준 원상 복구
+    SetTextAlign(hDC, TA_LEFT | TA_TOP);
 
     // 시작 버튼 렌더링
     // 마우스 오버 상태에 따라 브러시 색상 변경

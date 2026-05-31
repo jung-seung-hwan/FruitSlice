@@ -18,6 +18,9 @@ public:
     void Slice();
     bool IsSliced() const { return m_isSliced; }
 
+    // 과일이 화면 밖으로 벗어났는지 확인하는 함수
+    bool IsOutOfBounds() const;
+
 private:
     // 충돌체 및 렌더링을 위한 반지름
     float m_radius = 30.0f;

@@ -47,6 +47,20 @@ void Fruit::Slice()
     m_rightHalfVel = { 150.0f, -200.0f };
 }
 
+bool Fruit::IsOutOfBounds() const
+{
+    if (m_isSliced)
+    {
+        // 파편 상태일 때는 두 조각 모두 화면 아래로 떨어졌을 때 이탈로 판정
+        return (m_leftHalfPos.y > 850.0f && m_rightHalfPos.y > 850.0f);
+    }
+    else
+    {
+        // 원본 상태일 때는 화면 아래, 혹은 양옆으로 완전히 벗어났을 때 이탈로 판정
+        return (m_pos.y > 850.0f || m_pos.x < -100.0f || m_pos.x > 1124.0f);
+    }
+}
+
 void Fruit::Update(float deltaTime)
 {
     if (!IsActive()) return;
@@ -54,6 +68,7 @@ void Fruit::Update(float deltaTime)
     // 해상도 스케일에 맞게 조절할 중력 가속도 상수
     constexpr float GRAVITY = 600.0f;
 
+    // 잘려진 과일에 적용할 물리 연산
     if (m_isSliced)
     {
         // 양쪽 파편에 중력 적용
@@ -66,12 +81,6 @@ void Fruit::Update(float deltaTime)
         m_rightHalfPos.x += m_rightHalfVel.x * deltaTime;
         m_rightHalfPos.y += m_rightHalfVel.y * deltaTime;
 
-        // 두 파편이 모두 화면 아래로 떨어지면 객체 회수
-        if (m_leftHalfPos.y > 850.0f && m_rightHalfPos.y > 850.0f)
-        {
-            OnDespawn();
-            SetActive(false);
-        }
         return; // 원본 과일의 물리 연산은 건너뜀
     }
 
@@ -84,16 +93,6 @@ void Fruit::Update(float deltaTime)
         m_pColliderCircle->center = m_pos;
     }
 
-    // 화면 경계 이탈 검사
-    // 화면 하단을 완전히 벗어나거나, 양옆으로 날아갔을 경우 풀로 반환
-    const float padding = 100.0f;
-    if (m_pos.y > m_screenHeight + padding ||
-        m_pos.x < -padding ||
-        m_pos.x > m_screenWidth + padding)
-    {
-        OnDespawn();
-        SetActive(false);
-    }
 }
 
 void Fruit::Render(HDC hdc)

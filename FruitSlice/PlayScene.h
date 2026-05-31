@@ -26,6 +26,11 @@ public:
     void Render(HDC hDC) override;
 
 private:
+    // 게임 상태 관리 변수
+    int m_score = 0;
+    int m_missedCount = 0;
+    bool m_bGameOver = false;
+
     using BitmapInfo = renderHelp::BitmapInfo;
     BitmapInfo* m_pBackgroundBitmapInfo = nullptr;
     BitmapInfo* m_pSlashInfo = nullptr;
