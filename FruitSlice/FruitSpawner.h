@@ -19,7 +19,7 @@ private:
     ObjectPool<Fruit>* m_pFruitPool = nullptr;
 
     float m_spawnTimer = 0.0f;
-    float m_spawnInterval = 1.0f; // 2초마다 생성
+    float m_spawnInterval = 2.0f; // 2초마다 생성
 
     // 화면 하단 스폰을 위한 해상도 정보
     int m_screenWidth = 1024;

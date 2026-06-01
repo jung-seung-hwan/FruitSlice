@@ -64,7 +64,7 @@ void Fruit::Update(float deltaTime)
     if (!IsActive()) return;
 
     // 해상도 스케일에 맞게 조절할 중력 가속도 상수
-    constexpr float GRAVITY = 600.0f;
+    constexpr float GRAVITY = 400.0f;
 
     // 잘려진 과일에 적용할 물리 연산
     if (m_isSliced)

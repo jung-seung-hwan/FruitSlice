@@ -154,6 +154,10 @@
     <ClInclude Include="TitleScene.h" />
     <ClInclude Include="Utillity.h" />
   </ItemGroup>
+  <ItemGroup>
+    <Image Include="Resource\Background.png" />
+    <Image Include="Resource\Fruits.png" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
