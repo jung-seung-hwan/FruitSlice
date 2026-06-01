@@ -141,15 +141,10 @@ void PlayScene::Update(float deltaTime)
                 if (pObj && pObj->IsActive())
                 {
                     Fruit* pFruit = dynamic_cast<Fruit*>(pObj);
-                    // 과일 객체가 자신의 ColliderCircle 정보를 반환
-                    GameObject* pGameObj = static_cast<GameObject*>(pObj);
-
-                    // 원형 충돌체 정보를 가져옴
-                    const learning::ColliderCircle* pCircle = pGameObj->GetColliderCircle();
 
                     if (pFruit != nullptr)
                     {
-                        // 원형 충돌체 정보를 가져옴
+                        // 과일 객체에서 원형 충돌체 정보를 가져옴
                         const learning::ColliderCircle* pCircle = pFruit->GetColliderCircle();
 
                         // 충돌체가 존재하고, 아직 잘리지 않은 과일이며, 선분과 충돌했을 경우 
@@ -206,7 +201,7 @@ void PlayScene::Render(HDC hDC)
         DeleteObject(hPen);
     }
 
-    //  배경 위에 과일, 파편, 이펙트 등 활성화된 객체 렌더링
+    //  배경 위에 과일, 파편 등 활성화된 객체 렌더링
     for (auto* pObj : m_GameObjects)
     {
         if (pObj && pObj->IsActive())

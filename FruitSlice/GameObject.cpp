@@ -211,10 +211,8 @@ bool GameObject::IsCollidingWith(const GameObject* pOther) const
 
 void GameObject::OnSpawn()
 {
-    // 객체 활성화 시 부모 단위에서 공통으로 처리할 초기화 로직
 }
 
 void GameObject::OnDespawn()
 {
-    // 객체 비활성화 시 부모 단위에서 공통으로 처리할 정리 로직
 }

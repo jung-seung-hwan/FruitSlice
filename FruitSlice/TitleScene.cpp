@@ -9,7 +9,7 @@ void TitleScene::Initialize()
     // 배경
     m_pBackgroundBitmapInfo = renderHelp::CreateBitmapInfo(L"./Resource/Background.png");
 
-    // 정중앙에 200x80 크기의 버튼 배치
+    // 정중앙에 150x80 크기의 버튼 배치
     int btnWidth = 150;
     int btnHeight = 50;
     m_startButtonRect.left = (m_screenWidth - btnWidth) / 2;
@@ -20,7 +20,6 @@ void TitleScene::Initialize()
 
 void TitleScene::Enter()
 {
-    // 타이틀 BGM 재생 등
 }
 
 void TitleScene::Update(float deltaTime)
@@ -77,7 +76,7 @@ void TitleScene::Render(HDC hDC)
         DeleteDC(hMemDC);
     }
 
-    // 폰트 생성 (높이 72, 굵기 FW_BOLD, 폰트명 Arial)
+    // 폰트 생성
     HFONT hFont = CreateFontW(
         72, 0, 0, 0, FW_BOLD, FALSE, FALSE, FALSE,
         DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS,
@@ -87,12 +86,12 @@ void TitleScene::Render(HDC hDC)
     // 생성한 폰트를 DC에 적용
     HFONT hOldFont = (HFONT)SelectObject(hDC, hFont);
 
-    // 3. 텍스트 그리기 설정
+    // 텍스트 그리기 설정
     SetBkMode(hDC, TRANSPARENT);
     SetTextColor(hDC, RGB(255, 100, 0));   // 오렌지색
     SetTextAlign(hDC, TA_CENTER | TA_TOP); // 중앙 정렬
 
-    // 타이틀 텍스트 출력 (X: 512, Y: 150)
+    // 타이틀 텍스트 출력
     std::wstring titleText = L"Fruits Slice";
     TextOutW(hDC, 512, 150, titleText.c_str(), titleText.length());
 
@@ -128,7 +127,6 @@ void TitleScene::Render(HDC hDC)
 
 void TitleScene::Finalize()
 {
-    // 씬 메모리 해제 시 호출되는 로직
 }
 
 void TitleScene::Leave()

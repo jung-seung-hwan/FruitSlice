@@ -26,7 +26,7 @@ void FruitSpawner::SpawnFruit()
 
     // 풀에서 비활성화된 과일 객체 반환
     Fruit* newFruit = m_pFruitPool->Get();
-    if (newFruit == nullptr) return; // 가용 객체가 없을 경우 안전하게 종료
+    if (newFruit == nullptr) return; // 가용 객체가 없을 경우 종료
 
     // 초기 스폰 위치 설정 (화면 하단, X좌표는 무작위)
     float randomX = static_cast<float>(rand() % (m_screenWidth - 200) + 100);
@@ -34,7 +34,7 @@ void FruitSpawner::SpawnFruit()
     newFruit->SetPosition(randomX, startY);
 
     // 초기 속도 벡터 설정
-    float randomVx = static_cast<float>((rand() % 100) - 50) * 3.0f; // 좌우 난수
+    float randomVx = static_cast<float>((rand() % 100) - 50) * 1.5f; // 좌우 난수
     float startVy = -750.0f; // 윈도우 좌표계는 Y가 아래로 갈수록 증가하므로 음수 부여
 
      newFruit->SetVelocity(learning::Vector2f{randomVx, startVy});

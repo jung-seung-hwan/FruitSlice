@@ -13,7 +13,6 @@ Fruit::Fruit()
 
 Fruit::~Fruit()
 {
-    // 부모 클래스(GameObject) 소멸자에서 충돌체 동적 할당 해제 처리
 }
 
 void Fruit::OnSpawn()
@@ -30,7 +29,6 @@ void Fruit::OnSpawn()
 
 void Fruit::OnDespawn()
 {
-    // 풀로 반환될 때의 정리 로직
 }
 
 void Fruit::Slice()
@@ -121,7 +119,7 @@ void Fruit::Render(HDC hdc)
 
         if (!m_isSliced)
         {
-            // [정상 상태] 원본 과일 통째로 그리기 (기존 코드)
+            // 원본 과일 통째로 그리기 - 정상 상태
             int drawX = static_cast<int>(m_pos.x - (destWidth / 2.0f));
             int drawY = static_cast<int>(m_pos.y - (destHeight / 2.0f));
 
@@ -130,11 +128,11 @@ void Fruit::Render(HDC hdc)
         }
         else
         {
-            // [파편 상태] 이미지를 가로로 절반 잘라서 각각 그리기
+            // 이미지를 가로로 절반 잘라서 각각 그리기 - 파편 상태
             int srcHalfW = frameWidth / 2;
             int destHalfW = destWidth / 2;
 
-            // 1. 왼쪽 파편 그리기
+            // 왼쪽 파편 그리기
             int leftDrawX = static_cast<int>(m_leftHalfPos.x - destHalfW); // 왼쪽 조각의 중심 정렬
             int leftDrawY = static_cast<int>(m_leftHalfPos.y - (destHeight / 2.0f));
             AlphaBlend(hdc,
@@ -143,13 +141,13 @@ void Fruit::Render(HDC hdc)
                 srcX, srcY, srcHalfW, frameHeight, // 원본 왼쪽 절반
                 bf);
 
-            // 2. 오른쪽 파편 그리기
+            // 오른쪽 파편 그리기
             int rightDrawX = static_cast<int>(m_rightHalfPos.x); // 오른쪽 조각 시작점
             int rightDrawY = static_cast<int>(m_rightHalfPos.y - (destHeight / 2.0f));
             AlphaBlend(hdc,
                 rightDrawX, rightDrawY, destHalfW, destHeight, // 화면 절반
                 hMemDC,
-                srcX + srcHalfW, srcY, srcHalfW, frameHeight, // 원본 오른쪽 절반 (srcX 위치 이동)
+                srcX + srcHalfW, srcY, srcHalfW, frameHeight, // 원본 오른쪽 절반
                 bf);
         }
 
